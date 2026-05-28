@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Return — A Quiet Reminder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root[data-theme="light"] {
+    --bg: #f5f2ec;
+    --bg2: #edeae2;
+    --surface: #ffffff;
+    --surface2: #faf9f6;
+    --text: #1a1a18;
+    --text2: #4a4840;
+    --text3: #7a7670;
+    --accent: #8b6f47;
+    --accent2: #c4a882;
+    --accent-soft: #f0e8dc;
+    --line: rgba(139,111,71,0.15);
+    --card-shadow: 0 2px 24px rgba(139,111,71,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    --card-hover: 0 20px 60px rgba(139,111,71,0.14), 0 4px 16px rgba(0,0,0,0.06);
+    --glow: rgba(139,111,71,0.12);
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e0d0b;
+    --bg2: #151410;
+    --surface: #1a1916;
+    --surface2: #201f1b;
+    --text: #e8e4dc;
+    --text2: #b0aa9e;
+    --text3: #6e6860;
+    --accent: #c4a882;
+    --accent2: #8b6f47;
+    --accent-soft: #2a2520;
+    --line: rgba(196,168,130,0.12);
+    --card-shadow: 0 2px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+    --card-hover: 0 20px 60px rgba(196,168,130,0.08), 0 4px 16px rgba(0,0,0,0.3);
+    --glow: rgba(196,168,130,0.06);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.4s, color 0.4s;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ─── NOISE TEXTURE ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ─── THEME TOGGLE ─── */
+  .theme-toggle {
+    position: fixed;
+    top: 24px; right: 28px;
+    z-index: 100;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 40px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    display: flex; align-items: center; gap: 8px;
+    transition: all 0.3s;
+    box-shadow: var(--card-shadow);
+  }
+  .theme-toggle:hover { color: var(--accent); border-color: var(--accent2); }
+  .theme-toggle .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.3s;
+  }
+  .theme-toggle:hover .dot { transform: scale(1.4); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    padding: 80px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    pointer-events: none;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .hero-orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, var(--accent2), transparent 70%);
+    top: -100px; left: -100px;
+  }
+  .hero-orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    bottom: -80px; right: -80px;
+    animation-delay: -6s;
+  }
+  @keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(30px, 20px) scale(1.05); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 1s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 1s 0.4s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    font-weight: 300;
+    color: var(--text2);
+    max-width: 520px;
+    margin-bottom: 52px;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+  }
+
+  .hero-scroll {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    opacity: 0;
+    animation: fadeUp 1s 1s forwards;
+  }
+  .scroll-line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { transform: scaleY(1); opacity: 0.5; }
+    50%      { transform: scaleY(1.3); opacity: 1; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SECTION WRAPPER ─── */
+  .section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    max-width: 80px;
+  }
+
+  /* ─── AFFIRMATION CARD (3D) ─── */
+  .affirmation-block {
+    perspective: 1000px;
+    margin: 40px 0;
+  }
+
+  .affirmation-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 52px 56px;
+    box-shadow: var(--card-shadow);
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.23,1,0.32,1), box-shadow 0.5s;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+  }
+  .affirmation-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--glow) 0%, transparent 60%);
+    pointer-events: none;
+    border-radius: 20px;
+  }
+  .affirmation-card::after {
+    content: '"';
+    position: absolute;
+    top: 20px; left: 36px;
+    font-family: 'Playfair Display', serif;
+    font-size: 120px;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.08;
+    pointer-events: none;
+  }
+  .affirmation-card:hover {
+    box-shadow: var(--card-hover);
+    transform: rotateX(2deg) rotateY(-2deg) translateZ(8px);
+  }
+
+  .affirmation-text {
+    font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+    font-weight: 300;
+    line-height: 1.65;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+  }
+  .affirmation-text strong {
+    font-weight: 400;
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    display: flex; align-items: center; gap: 20px;
+    margin: 60px 0;
+    color: var(--text3);
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .divider-symbol {
+    font-size: 18px;
+    color: var(--accent);
+    opacity: 0.5;
+  }
+
+  /* ─── GRID CARDS ─── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    margin: 40px 0;
+  }
+
+  .card-3d {
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 36px 32px;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s;
+    perspective: 800px;
+    transform-style: preserve-3d;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-3d::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, var(--glow), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+  }
+  .card-3d:hover { 
+    transform: translateY(-6px) rotateX(3deg);
+    box-shadow: var(--card-hover);
+  }
+  .card-3d:hover::before { opacity: 1; }
+
+  .card-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
+    filter: grayscale(0.3);
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .card-body {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  /* ─── TRACKER SECTION ─── */
+  .tracker-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.2s;
+  }
+  .tracker-row:last-child { border-bottom: none; }
+
+  .tracker-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    opacity: 0.6;
+    min-width: 24px;
+    padding-top: 4px;
+  }
+
+  .tracker-content { flex: 1; }
+
+  .tracker-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tracker-desc {
+    font-size: 0.92rem;
+    font-weight: 300;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  .tracker-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 4px 12px;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* ─── BIG QUOTE ─── */
+  .big-quote {
+    text-align: center;
+    padding: 80px 24px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .big-quote p {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3.5vw, 2.6rem);
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--text2);
+    font-style: italic;
+  }
+  .big-quote p em {
+    font-style: normal;
+    color: var(--text);
+  }
+  .big-quote-line {
+    width: 48px; height: 2px;
+    background: var(--accent);
+    margin: 32px auto 0;
+    opacity: 0.5;
+  }
+
+  /* ─── IDENTITY LIST ─── */
+  .identity-list {
+    list-style: none;
+    margin: 32px 0;
+  }
+  .identity-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: var(--text2);
+    transition: color 0.2s, padding-left 0.3s;
+  }
+  .identity-list li:hover {
+    color: var(--text);
+    padding-left: 8px;
+  }
+  .identity-list li::before {
+    content: '—';
+    color: var(--accent);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .identity-list li:last-child { border-bottom: none; }
+
+  /* ─── EMERGENCY BOX ─── */
+  .emergency-box {
+    background: var(--surface);
+    border: 1px solid var(--accent2);
+    border-radius: 16px;
+    padding: 40px 44px;
+    margin: 40px 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 40px var(--glow);
+  }
+  .emergency-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+    border-radius: 4px 0 0 4px;
+  }
+  .emergency-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .emergency-items {
+    list-style: none;
+    display: flex; flex-wrap: wrap; gap: 12px;
+  }
+  .emergency-items li {
+    background: var(--accent-soft);
+    color: var(--text2);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 300;
+    transition: background 0.2s, color 0.2s;
+  }
+  .emergency-items li:hover {
+    background: var(--accent);
+    color: white;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    text-align: center;
+    padding: 60px 24px;
+    border-top: 1px solid var(--line);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--text3);
+  }
+  footer span { color: var(--accent); }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s cubic-bezier(0.23,1,0.32,1), transform 0.8s cubic-bezier(0.23,1,0.32,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── FLOATING CARD 3D MOUSEMOVE ─── */
+  .perspective-wrap { perspective: 1200px; }
+
+  /* ─── PROGRESS ORBS ─── */
+  .orb-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .orb {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--line);
+    border: 1.5px solid var(--accent2);
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .orb.filled { background: var(--accent); }
+  .orb-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+  }
+
+  /* ─── HERO FLOAT ANIMATION ─── */
+  .hero-card-wrap {
+    margin: 52px auto 0;
+    max-width: 540px;
+    perspective: 1000px;
+    opacity: 0;
+    animation: fadeUp 1s 0.8s forwards;
+  }
+  .hero-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 36px 40px;
+    box-shadow: var(--card-shadow);
+    transform: rotateX(4deg) rotateY(-4deg);
+    transition: transform 0.5s, box-shadow 0.5s;
+    animation: heroFloat 6s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--glow), transparent);
+    pointer-events: none;
+  }
+  @keyframes heroFloat {
+    0%,100% { transform: rotateX(4deg) rotateY(-4deg) translateY(0); }
+    50%      { transform: rotateX(2deg) rotateY(-2deg) translateY(-10px); }
+  }
+  .hero-card-text {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--text2);
+    line-height: 1.75;
+  }
+  .hero-card-text strong {
+    color: var(--accent);
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  @media (max-width: 640px) {
+    .affirmation-card { padding: 36px 28px; }
+    .emergency-box { padding: 28px 24px; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Theme Toggle -->
+<button class="theme-toggle" onclick="toggleTheme()">
+  <div class="dot"></div>
+  <span id="theme-label">LIGHT</span>
+</button>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+
+  <div class="hero-eyebrow">A quiet reminder</div>
+
+  <h1 class="hero-title">You are not<br><em>starting over.</em></h1>
+  <p class="hero-sub">You are returning. That's a big difference. The core is intact — it always was.</p>
+
+  <div class="hero-card-wrap">
+    <div class="hero-card">
+      <p class="hero-card-text">
+        A completely lost person doesn't ask how to get back.<br>
+        You're still asking. <strong>That matters more than you think.</strong>
+      </p>
+    </div>
+  </div>
+
+  <div class="hero-scroll" style="margin-top:60px">
+    <div class="scroll-line"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- ─── YOU ALREADY SURVIVED ─── -->
+<div class="section reveal">
+  <div class="section-label">Chapter I</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:400; line-height:1.2; margin-bottom:12px;">
+    What you've<br>already carried.
+  </h2>
+  <p style="font-size:1.1rem; font-weight:300; color:var(--text2); max-width:520px;">These weren't failures. They were a curriculum. You passed.</p>
+
+  <div class="affirmation-block" style="margin-top:36px;">
+    <div class="affirmation-card" id="card1">
+      <p class="affirmation-text">
+        Feeling <strong>socially behind</strong>. Comparison that wouldn't quiet down. 
+        The weight of expectations. Emotional distance from people you love. 
+        Fear of disappointing those who believe in you. Days that vanished without reason.
+        <br><br>
+        And yet — your instinct is still: <strong>"I should get back on track."</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── BIG QUOTE 1 ─── -->
+<div class="big-quote reveal">
+  <p>"Your <em>core is intact.</em> You are not fighting to become valuable. You are fighting to stop <em>forgetting your value.</em>"</p>
+  <div class="big-quote-line"></div>
+</div>
+
+<!-- ─── YOUR TRAITS ─── -->
+<div class="section reveal">
+  <div class="section-label">Chapter II</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:400; line-height:1.2; margin-bottom:32px;">
+    Who you already are.
+  </h2>
+
+  <div class="cards-grid">
+    <div class="card-3d" id="t1">
+      <span class="card-icon">◉</span>
+      <div class="card-title">Deep Observer</div>
+      <div class="card-body">You think slowly and carefully. You notice what others miss. That's not a liability — it's a superpower that needs direction.</div>
+    </div>
+    <div class="card-3d" id="t2">
+      <span class="card-icon">◎</span>
+      <div class="card-title">Meaning-Seeker</div>
+      <div class="card-body">You romanticise life in a meaningful way. That inner depth is rare. It just needs anchoring so it doesn't drift into over-thinking.</div>
+    </div>
+    <div class="card-3d" id="t3">
+      <span class="card-icon">◈</span>
+      <div class="card-title">Quietly Driven</div>
+      <div class="card-body">You want competence, not attention. You want independence, not validation. That instinct is exactly right — trust it.</div>
+    </div>
+    <div class="card-3d" id="t4">
+      <span class="card-icon">◇</span>
+      <div class="card-title">Genuinely Caring</div>
+      <div class="card-body">You feel the weight of people's hope in you. That's not a burden you invented — it's proof you understand what loyalty means.</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider reveal"><span class="divider-symbol">✦</span></div>
+
+<!-- ─── YOUR IDENTITY ─── -->
+<div class="section reveal">
+  <div class="section-label">Chapter III</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:400; line-height:1.2; margin-bottom:8px;">
+    Your character, now.
+  </h2>
+  <p style="font-size:1rem; font-weight:300; color:var(--text3); margin-bottom:24px;">Not aspirational. Already true.</p>
+
+  <ul class="identity-list">
+    <li>Quiet, but observant — you miss nothing that matters</li>
+    <li>Disciplined before emotional — the system holds when feelings don't</li>
+    <li>Reliable even when low — showing up is the whole practice</li>
+    <li>Someone who builds depth slowly and without audience</li>
+    <li>Someone who <em>finishes</em> things</li>
+    <li>Someone who protects his mind and body because others depend on him</li>
+    <li>Someone who can sit alone and still move forward</li>
+  </ul>
+</div>
+
+<!-- ─── BIG QUOTE 2 ─── -->
+<div class="big-quote reveal">
+  <p>"The productive days weren't fake. The focused version of you wasn't temporary. <em>That was you.</em> The mission now is simpler — become stable enough that he appears consistently."</p>
+  <div class="big-quote-line"></div>
+</div>
+
+<!-- ─── DAILY PILLARS ─── -->
+<div class="section reveal">
+  <div class="section-label">Chapter IV</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:400; line-height:1.2; margin-bottom:8px;">
+    Daily pillars.
+  </h2>
+  <p style="font-size:1rem; font-weight:300; color:var(--text3); margin-bottom:36px;">Not motivation. Systems. Not intensity. Repetition.</p>
+
+  <div class="tracker-row">
+    <div class="tracker-num">01</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Study & Career Progress</div>
+      <div class="tracker-desc">45 minutes of real work. On terrible days — 15 minutes. Never zero.</div>
+    </div>
+    <div class="tracker-pill">45 min</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">02</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Reading</div>
+      <div class="tracker-desc">10 pages. Fiction, philosophy, biography, psychology. Your brain needs depth, not only dopamine.</div>
+    </div>
+    <div class="tracker-pill">10 pages</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">03</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Movement</div>
+      <div class="tracker-desc">20 minutes or 5,000 steps. The goal isn't aesthetics. The goal is energy, confidence, emotional stability.</div>
+    </div>
+    <div class="tracker-pill">20 min</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">04</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Nourish Well</div>
+      <div class="tracker-desc">More water. One fruit. Protein in at least one meal. No extreme rules — just gentle consistency.</div>
+    </div>
+    <div class="tracker-pill">daily</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">05</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Language Learning</div>
+      <div class="tracker-desc">10–15 minutes. Consistency matters more than duration. Keep the streak, not the session length.</div>
+    </div>
+    <div class="tracker-pill">15 min</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">06</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Skincare & Grooming</div>
+      <div class="tracker-desc">Morning and night. Facewash, serum, sunscreen. Don't overcomplicate. Two minutes, twice daily.</div>
+    </div>
+    <div class="tracker-pill">2 min</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">07</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Intentional Entertainment</div>
+      <div class="tracker-desc">One episode, one film, music you love. Not banned — just conscious. Consume intentionally, not endlessly.</div>
+    </div>
+    <div class="tracker-pill">1 thing</div>
+  </div>
+  <div class="tracker-row">
+    <div class="tracker-num">08</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Journal & Tomorrow's Plan</div>
+      <div class="tracker-desc">5 minutes at night. What went right. What felt hard. One improvement. Three tasks for tomorrow.</div>
+    </div>
+    <div class="tracker-pill">5 min</div>
+  </div>
+  <div class="tracker-row" style="border-bottom:none;">
+    <div class="tracker-num">09</div>
+    <div class="tracker-content">
+      <div class="tracker-name">Rest, Protect Sleep</div>
+      <div class="tracker-desc">Sleep before the scroll destroys your brain. The morning version of you will be grateful every time.</div>
+    </div>
+    <div class="tracker-pill">non-neg.</div>
+  </div>
+</div>
+
+<!-- ─── RULE ─── -->
+<div class="section reveal" style="text-align:center; padding-top:20px; padding-bottom:40px;">
+  <div class="affirmation-block">
+    <div class="affirmation-card">
+      <p class="affirmation-text" style="text-align:center; font-size:clamp(1.4rem,2.5vw,2rem);">
+        Hit <strong>7 out of 9</strong> every day.<br>
+        Miss a day? Fine.<br>
+        <strong>Never miss twice.</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="divider reveal"><span class="divider-symbol">✦</span></div>
+
+<!-- ─── EMERGENCY PROTOCOL ─── -->
+<div class="section reveal">
+  <div class="section-label">Chapter V</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(1.8rem,4vw,3rem); font-weight:400; line-height:1.2; margin-bottom:8px;">
+    For hard days.
+  </h2>
+  <p style="font-size:1rem; font-weight:300; color:var(--text3); margin-bottom:32px;">When everything collapses — do just these four. That's enough to prevent identity collapse.</p>
+
+  <div class="emergency-box">
+    <div class="emergency-title">Emergency Protocol</div>
+    <ul class="emergency-items">
+      <li>🚿 Shower</li>
+      <li>📖 Study 15 min</li>
+      <li>🚶 Walk</li>
+      <li>✍️ Journal 3 lines</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ─── FINAL AFFIRMATION ─── -->
+<div class="section reveal" style="padding-bottom:100px;">
+  <div class="section-label">Final</div>
+  <div class="affirmation-block">
+    <div class="affirmation-card" id="final-card">
+      <p class="affirmation-text">
+        Your life is entering one of those phases that later feels important in hindsight.<br><br>
+        Not dramatic movie-important.<br>
+        <strong>Quietly important.</strong><br><br>
+        The kind where a person either slowly becomes sharper and dependable — or becomes chronically distracted and emotionally tired.<br><br>
+        You already know which side you want.<br><br>
+        And the fact that you're asking for <strong>structure instead of escape</strong> is already a very good sign.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  A reminder made with care &nbsp;·&nbsp; <span>Return, don't restart.</span>
+</footer>
+
+<script>
+  // ── Theme Toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const label = document.getElementById('theme-label');
+    if (html.dataset.theme === 'light') {
+      html.dataset.theme = 'dark';
+      label.textContent = 'DARK';
+    } else {
+      html.dataset.theme = 'light';
+      label.textContent = 'LIGHT';
+    }
+  }
+
+  // ── Scroll Reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // ── 3D Card Mouse Tilt
+  function addTilt(el) {
+    el.addEventListener('mousemove', e => {
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      el.style.transform = `rotateX(${-dy * 6}deg) rotateY(${dx * 6}deg) translateZ(8px)`;
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transform = '';
+    });
+  }
+
+  document.querySelectorAll('.card-3d').forEach(addTilt);
+  document.querySelectorAll('.affirmation-card').forEach(addTilt);
+
+  // ── Prefer Dark
+  if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.dataset.theme = 'dark';
+    document.getElementById('theme-label').textContent = 'DARK';
+  }
+</script>
+</body>
+</html>
